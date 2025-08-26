@@ -22,7 +22,7 @@ public sealed class MovingPlatform : AbstractAsset, IDeserializable<MovingPlatfo
     public AbstractAsset[] Assets { get; set; } = null!;
 
     public MovingPlatform() { }
-    private MovingPlatform(XElement e)
+    private MovingPlatform(XElement e) : base(e)
     {
         PlatID = e.GetAttribute("PlatID");
         //Animation is always supposed to exist
