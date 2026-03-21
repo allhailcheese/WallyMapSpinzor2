@@ -25,9 +25,11 @@ public sealed class MovingPlatform : AbstractAsset, IDeserializable<MovingPlatfo
     private MovingPlatform(XElement e) : base(e)
     {
         PlatID = e.GetAttribute("PlatID");
-        //Animation is always supposed to exist
-        //The game technically supports it not existing
-        //In which case the moving platform doesn't exist
+        /*
+        Animation is always supposed to exist
+        The game technically supports it not existing
+        In which case the moving platform doesn't exist
+        */
         Animation = e.DeserializeRequiredChildOfType<Animation>();
         Assets = e.DeserializeAssetChildren();
         foreach (AbstractAsset a in Assets)
@@ -44,21 +46,39 @@ public sealed class MovingPlatform : AbstractAsset, IDeserializable<MovingPlatfo
             e.Add(a.SerializeToXElement());
     }
 
-    public void StoreMovingPlatformOffset(RenderContext ctx, TimeSpan time)
+    public void StoreMovingPlatformOffset(RenderContext context, TimeSpan time)
     {
-        ((double offX, double offY, double rot), (double anmX, double anmY)) = Animation.GetOffset(ctx, time);
-        ctx.PlatIDDynamicOffset[PlatID] = (offX - anmX, offY - anmY);
-        ctx.PlatIDMovingPlatformTransform[PlatID] = Transform.CreateFrom(
-            x: offX + Math.Round(X * 100) / 100,
-            y: offY + Math.Round(Y * 100) / 100,
+        /*
+        If there are multiple MovingPlatforms with the same numeric PlatID,
+        the first one's Animation is used for the others too.
+
+        Thanks bmg.
+        */
+        uint platID = (uint)Utils.AS3ParseInt(PlatID);
+        context.AnimationByPlatID.TryAdd(platID, Animation);
+
+        Animation animation = context.AnimationByPlatID[platID];
+
+        ((double offX, double offY, double rot), (double anmX, double anmY)) = animation.GetOffset(context, time);
+
+        if (context.MovingPlatformByPlatID.TryGetValue(PlatID, out var list))
+            list.Add(this);
+        else
+            context.MovingPlatformByPlatID[PlatID] = [this];
+
+        context.MovingPlatformDynamicOffset[this] = (offX - anmX, offY - anmY);
+
+        context.MovingPlatformTransform[this] = Transform.CreateFrom(
+            x: offX + X,
+            y: offY + Y,
             rot: rot * Math.PI / 180
         );
     }
 
     public override void DrawOn(ICanvas canvas, Transform trans, RenderConfig config, RenderContext context, RenderState state)
     {
-        if (!context.PlatIDMovingPlatformTransform.TryGetValue(PlatID, out Transform platTrans))
-            throw new InvalidOperationException($"Plat ID dictionary did not contain plat id {PlatID} when attempting to draw MovingPlatform. Make sure to call {nameof(StoreMovingPlatformOffset)}.");
+        if (!context.MovingPlatformTransform.TryGetValue(this, out Transform platTrans))
+            throw new InvalidOperationException($"Moving platform transform dictionary did not contain moving platform with PlatID {PlatID} when attempting to draw MovingPlatform. Make sure to call {nameof(StoreMovingPlatformOffset)}.");
 
         Transform childTrans = trans * platTrans;
         foreach (AbstractAsset a in Assets)

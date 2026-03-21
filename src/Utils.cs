@@ -33,4 +33,68 @@ public static class Utils
         canvas.DrawLine(x2, y2, x1 + arrowEndX1, y1 + arrowEndY1, color, trans, priority, caller);
         canvas.DrawLine(x2, y2, x1 + arrowEndX2, y1 + arrowEndY2, color, trans, priority, caller);
     }
+
+    public static int AS3ParseInt(ReadOnlySpan<char> str)
+    {
+        if (str.IsEmpty)
+            return 0; // NaN
+
+        int i = 0;
+
+        // Skip leading whitespace
+        while (i < str.Length && char.IsWhiteSpace(str[i]))
+            i++;
+
+        if (i >= str.Length)
+            return 0; // NaN
+
+        // Handle sign
+        int sign = 1;
+        if (str[i] == '+' || str[i] == '-')
+        {
+            if (str[i] == '-') sign = -1;
+            i++;
+        }
+
+        if (i >= str.Length)
+            return 0; // NaN
+
+        // Detect hex (0x / 0X)
+        int radix = 10;
+        if (i + 1 < str.Length && str[i] == '0' && (str[i + 1] == 'x' || str[i + 1] == 'X'))
+        {
+            radix = 16;
+            i += 2;
+        }
+
+        int result = 0;
+        bool foundDigit = false;
+
+        while (i < str.Length)
+        {
+            char c = str[i];
+            int digit;
+
+            if (c >= '0' && c <= '9')
+                digit = c - '0';
+            else if (c >= 'a' && c <= 'z')
+                digit = c - 'a' + 10;
+            else if (c >= 'A' && c <= 'Z')
+                digit = c - 'A' + 10;
+            else
+                break;
+
+            if (digit >= radix)
+                break;
+
+            foundDigit = true;
+            result = result * radix + digit;
+            i++;
+        }
+
+        if (!foundDigit)
+            return 0; // NaN
+
+        return sign * result;
+    }
 }

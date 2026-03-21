@@ -80,8 +80,13 @@ public abstract class AbstractPressurePlateCollision : AbstractCollision
 
         if (config.ShowAssets)
         {
-            Transform platTrans = PlatID is not null
-                ? context.PlatIDMovingPlatformTransform.GetValueOrDefault(PlatID, Transform.IDENTITY)
+            MovingPlatform? movingPlatform = PlatID is not null
+                // pressure plate is affected by the last moving platform with that PlatID
+                ? context.MovingPlatformByPlatID.GetValueOrDefault(PlatID, []).LastOrDefault()
+                : null;
+
+            Transform platTrans = movingPlatform is not null
+                ? context.MovingPlatformTransform[movingPlatform]
                 : Transform.IDENTITY;
 
             Transform spriteTrans = Transform.CreateFrom(x: AnimOffsetX, y: AnimOffsetY, rot: AnimRotation * Math.PI / 180);

@@ -107,8 +107,10 @@ public sealed class LevelDesc : IDeserializable<LevelDesc>, ISerializable, IDraw
         context.DefaultSlowMult = SlowMult;
         foreach (Background b in Backgrounds)
             b.UpdateBackground(context, config);
-        context.PlatIDDynamicOffset.Clear();
-        context.PlatIDMovingPlatformTransform.Clear();
+        context.AnimationByPlatID.Clear();
+        context.MovingPlatformByPlatID.Clear();
+        context.MovingPlatformDynamicOffset.Clear();
+        context.MovingPlatformTransform.Clear();
         foreach (MovingPlatform mp in Assets.OfType<MovingPlatform>())
             mp.StoreMovingPlatformOffset(context, config.Time);
         context.DynamicCollisionPlatIDOwner.Clear();

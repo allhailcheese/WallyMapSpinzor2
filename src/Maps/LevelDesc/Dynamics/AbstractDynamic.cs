@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace WallyMapSpinzor2;
@@ -29,10 +31,15 @@ public abstract class AbstractDynamic<T> : ISerializable, IDrawable
         e.AddManySerialized(Children);
     }
 
-    public virtual (double, double) GetOffset(RenderContext context) =>
-        context.PlatIDDynamicOffset.TryGetValue(PlatID, out (double, double) dynOffset)
-            ? dynOffset
+    public virtual (double, double) GetOffset(RenderContext context)
+    {
+        // dynamics are affected by the first moving platform with that PlatID
+        MovingPlatform? movingPlatform = context.MovingPlatformByPlatID.GetValueOrDefault(PlatID, []).FirstOrDefault();
+
+        return movingPlatform is not null
+            ? context.MovingPlatformDynamicOffset[movingPlatform]
             : (0, 0);
+    }
 
     public virtual void DrawOn(ICanvas canvas, Transform trans, RenderConfig config, RenderContext context, RenderState state)
     {

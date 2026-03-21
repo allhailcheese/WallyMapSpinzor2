@@ -16,14 +16,16 @@ public sealed class RenderContext
 
     public Background? CurrentBackground { get; set; } = null;
 
-    public Dictionary<string, (double, double)> PlatIDDynamicOffset { get; set; } = [];
-    public Dictionary<string, Transform> PlatIDMovingPlatformTransform { get; set; } = [];
+    public Dictionary<uint, Animation> AnimationByPlatID { get; init; } = [];
+    public Dictionary<string, List<MovingPlatform>> MovingPlatformByPlatID { get; init; } = [];
+    public Dictionary<MovingPlatform, (double, double)> MovingPlatformDynamicOffset { get; init; } = [];
+    public Dictionary<MovingPlatform, Transform> MovingPlatformTransform { get; init; } = [];
     /*
     DynamicCollision (and no other dynamics) have a "bug",
     where only the last DynamicCollision will actually get offset by the moving platform.
     This emulates that behavior.
     */
-    public Dictionary<string, DynamicCollision> DynamicCollisionPlatIDOwner { get; set; } = [];
+    public Dictionary<string, DynamicCollision> DynamicCollisionPlatIDOwner { get; init; } = [];
 
-    public Dictionary<uint, (double, double)> NavIDDictionary { get; set; } = [];
+    public Dictionary<uint, (double, double)> NavIDDictionary { get; init; } = [];
 }

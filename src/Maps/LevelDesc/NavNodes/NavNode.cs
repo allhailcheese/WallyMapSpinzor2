@@ -1,6 +1,6 @@
 using System;
-using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 
 namespace WallyMapSpinzor2;
@@ -10,7 +10,7 @@ public sealed class NavNode : IDeserializable<NavNode>, ISerializable, IDrawable
     public uint NavID { get; set; }
     public NavNodeTypeEnum Type { get; set; }
     // the given type in the path doesn't actually do anything
-    public (uint, NavNodeTypeEnum)[] Path { get; set; } = null!;
+    public (uint, NavNodePathTypeFlags)[] Path { get; set; } = null!;
     public double X { get; set; }
     public double Y { get; set; }
 
@@ -21,29 +21,60 @@ public sealed class NavNode : IDeserializable<NavNode>, ISerializable, IDrawable
     {
         (NavID, Type) = ParseNavID(e.GetAttribute("NavID"));
         //the "not empty" is a guard against an empty path, where an empty string would be passed to ParseNavID
-        Path = [.. e.GetAttribute("Path").Split(',').Where(s => s != "").Select(ParseNavID)];
+        Path = [.. e.GetAttribute("Path").Split(',').Where(s => s != "").Select(ParsePathNavID)];
         X = e.GetDoubleAttribute("X", 0);
         Y = e.GetDoubleAttribute("Y", 0);
     }
     public static NavNode Deserialize(XElement e) => new(e);
 
-    // needed due to a mistake in NorseWinterFFA. emulates actionscript parseInt ignoring trailing garbage.
-    private static uint UIntParse(string str)
-    {
-        str = str.Trim();
-        int takeUntil = 0; while (takeUntil < str.Length && char.IsDigit(str[takeUntil])) takeUntil++;
-        return uint.Parse(str.AsSpan()[..takeUntil], CultureInfo.InvariantCulture);
-    }
-
     public static (uint, NavNodeTypeEnum) ParseNavID(string navId)
     {
-        return '0' <= navId[0] && navId[0] <= '9'
-            ? (UIntParse(navId), NavNodeTypeEnum._)
-            : (UIntParse(navId[1..]), Enum.TryParse(
-                navId[0].ToString(), out NavNodeTypeEnum type)
-                    ? type
-                    : NavNodeTypeEnum._
-            );
+        ReadOnlySpan<char> id = navId.AsSpan();
+        if (id.Length == 0)
+            return (0, NavNodeTypeEnum._);
+
+        NavNodeTypeEnum type = id[0] switch
+        {
+            'W' => NavNodeTypeEnum.W,
+            'A' => NavNodeTypeEnum.A,
+            'L' => NavNodeTypeEnum.L,
+            'G' => NavNodeTypeEnum.G,
+            'T' => NavNodeTypeEnum.T,
+            'S' => NavNodeTypeEnum.S,
+            _ => NavNodeTypeEnum._,
+        };
+
+        if (type != NavNodeTypeEnum._)
+            id = id[1..];
+
+        uint parsedId = (uint)Utils.AS3ParseInt(id);
+        return (parsedId, type);
+    }
+
+    // the path type is parsed by the game, but ignored
+    public static (uint, NavNodePathTypeFlags) ParsePathNavID(string navId)
+    {
+        NavNodePathTypeFlags result = 0;
+
+        ReadOnlySpan<char> id = navId.AsSpan();
+        while (id.Length > 0 && (id[0] < '0' || id[0] > '9'))
+        {
+            NavNodePathTypeFlags curr = id[0] switch
+            {
+                'D' => NavNodePathTypeFlags.D,
+                'A' => NavNodePathTypeFlags.A,
+                'L' => NavNodePathTypeFlags.L,
+                'G' => NavNodePathTypeFlags.G,
+                'T' => NavNodePathTypeFlags.T,
+                'S' => NavNodePathTypeFlags.S,
+                _ => 0,
+            };
+            result |= curr;
+            id = id[1..];
+        }
+        uint parsedId = (uint)Utils.AS3ParseInt(id);
+
+        return (parsedId, result);
     }
 
     public static string NavIDToString(uint id, NavNodeTypeEnum type)
@@ -51,6 +82,19 @@ public sealed class NavNode : IDeserializable<NavNode>, ISerializable, IDrawable
         return type == NavNodeTypeEnum._
             ? id.ToString()
             : $"{type}{id}";
+    }
+
+    public static string PathNavIDToString(uint id, NavNodePathTypeFlags type)
+    {
+        StringBuilder sb = new();
+        if (type.HasFlag(NavNodePathTypeFlags.D)) sb.Append('D');
+        if (type.HasFlag(NavNodePathTypeFlags.A)) sb.Append('A');
+        if (type.HasFlag(NavNodePathTypeFlags.L)) sb.Append('L');
+        if (type.HasFlag(NavNodePathTypeFlags.G)) sb.Append('G');
+        if (type.HasFlag(NavNodePathTypeFlags.T)) sb.Append('T');
+        if (type.HasFlag(NavNodePathTypeFlags.S)) sb.Append('S');
+        sb.Append(id);
+        return sb.ToString();
     }
 
     private static Color GetNavIDColor(NavNodeTypeEnum type, RenderConfig config) => type switch
@@ -67,7 +111,7 @@ public sealed class NavNode : IDeserializable<NavNode>, ISerializable, IDrawable
     public void Serialize(XElement e)
     {
         e.SetAttributeValue("NavID", NavIDToString(NavID, Type));
-        e.SetAttributeValue("Path", string.Join(',', Path.Select(_ => NavIDToString(_.Item1, _.Item2))));
+        e.SetAttributeValue("Path", string.Join(',', Path.Select(_ => PathNavIDToString(_.Item1, _.Item2))));
         if (X != 0)
             e.SetAttributeValue("X", X);
         if (Y != 0)

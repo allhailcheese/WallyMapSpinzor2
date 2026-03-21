@@ -69,7 +69,8 @@ public abstract class AbstractAsset : ISerializable, IDrawable
         if (!config.ShowAssets)
             return;
 
-        if (AssetName is null) return;
+        if (AssetName is null)
+            return;
 
         if (context.AssetDir is null)
             throw new InvalidOperationException("Attempting to draw an asset, but the render context is missing the AssetDir.");

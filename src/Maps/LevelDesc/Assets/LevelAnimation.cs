@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace WallyMapSpinzor2;
@@ -186,9 +187,15 @@ public sealed class LevelAnimation : IDeserializable<LevelAnimation>, ISerializa
 
         if (state.Gfx is not null)
         {
-            Transform platTrans = PlatID is null
-                ? Transform.IDENTITY
-                : context.PlatIDMovingPlatformTransform.GetValueOrDefault(PlatID, Transform.IDENTITY);
+            MovingPlatform? movingPlatform = PlatID is not null
+                // LevelAnimation is affected by the first moving platform with that PlatID
+                ? context.MovingPlatformByPlatID.GetValueOrDefault(PlatID, []).FirstOrDefault()
+                : null;
+
+            Transform platTrans = movingPlatform is not null
+                ? context.MovingPlatformTransform[movingPlatform]
+                : Transform.IDENTITY;
+
             // LevelAnimation is not affected by keyframe Rotation
             platTrans = Transform.CreateTranslate(platTrans.TranslateX, platTrans.TranslateY);
 

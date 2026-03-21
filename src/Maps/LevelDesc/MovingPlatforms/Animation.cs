@@ -115,24 +115,24 @@ public sealed class Animation : IDeserializable<Animation>, ISerializable
             if (gotA && gotP1 && gotP2) break;
 
             KeyFrame k = keyframes[i];
-            KeyFrame k2; int frame2;
+            KeyFrame k2; int nextFrame;
             if (i == keyframes.Count - 1)
             {
                 k2 = keyframes[0];
-                frame2 = (NumFrames ?? context.DefaultNumFrames ?? 0) + 1;
+                nextFrame = (NumFrames ?? context.DefaultNumFrames ?? 0) + 1;
             }
             else
             {
                 k2 = keyframes[i + 1];
-                frame2 = k2.FrameNum;
+                nextFrame = k2.FrameNum;
             }
 
-            if (currentFrame >= frame2)
+            if (currentFrame >= nextFrame)
                 continue;
 
             (double x, double y, double rot) LerpForFrame(uint frame)
             {
-                double w = (frame - k.FrameNum) / (double)(frame2 - k.FrameNum);
+                double w = (frame - k.FrameNum) / (double)(nextFrame - k.FrameNum);
                 w = BrawlhallaMath.EaseWeight(w,
                     k.EaseIn ?? EaseIn,
                     k.EaseOut ?? EaseOut,
@@ -151,19 +151,19 @@ public sealed class Animation : IDeserializable<Animation>, ISerializable
                 gotA = true;
             }
 
-            if (!gotP1 && currentFrame <= frameForNextIndex && frameForNextIndex < frame2)
+            if (!gotP1 && currentFrame <= frameForNextIndex && frameForNextIndex < nextFrame)
             {
                 (p1x, p1y, p1rot) = LerpForFrame(frameForNextIndex);
                 gotP1 = true;
             }
 
-            if (!gotP2 && currentFrame <= frameForIndex && frameForIndex < frame2)
+            if (!gotP2 && currentFrame <= frameForIndex && frameForIndex < nextFrame)
             {
                 (p2x, p2y, p2rot) = LerpForFrame(frameForIndex);
                 gotP2 = true;
             }
 
-            currentFrame = frame2;
+            currentFrame = nextFrame;
         }
 
         double x = p1x * smallDiff + p2x * (1 - smallDiff);
