@@ -19,10 +19,7 @@ public sealed class RenderConfig : IDeserializable<RenderConfig>, ISerializable
         BOTTOM,
     }
 
-    // it is the responsibility of the renderer to use these
     public TimeSpan Time { get; set; }
-    public required double RenderSpeed { get; set; }
-
 
     //Which ScoringType to use
     public required ScoringTypeEnum ScoringType { get; set; }
@@ -197,7 +194,6 @@ public sealed class RenderConfig : IDeserializable<RenderConfig>, ISerializable
     public RenderConfig(RenderConfig other)
     {
         Time = other.Time;
-        RenderSpeed = other.RenderSpeed;
         ScoringType = other.ScoringType;
         Theme = other.Theme;
         Hotkey = other.Hotkey;
@@ -311,7 +307,6 @@ public sealed class RenderConfig : IDeserializable<RenderConfig>, ISerializable
         Color[] getColorArray(string name, Color[] @default, int count, int offset = 0) => [.. getUIntArray(name, [.. @default.Select(c => c.ToHex())], count, offset).Select(Color.FromHex)];
 
         RenderConfig @default = Default;
-        RenderSpeed = getDouble(nameof(RenderSpeed), @default.RenderSpeed);
         ScoringType = getEnum(nameof(ScoringType), @default.ScoringType);
         Theme = getEnum(nameof(Theme), @default.Theme);
         Hotkey = getEnum(nameof(Hotkey), @default.Hotkey);
@@ -420,7 +415,6 @@ public sealed class RenderConfig : IDeserializable<RenderConfig>, ISerializable
         }
         void addColorArray(string name, Color[] values, int count, int offset = 0) => addArray(name, [.. values.Select(c => "0x" + c.ToHex().ToString("X8"))], count, offset);
 
-        addValue(nameof(RenderSpeed), RenderSpeed);
         addValue(nameof(ScoringType), ScoringType);
         addValue(nameof(Theme), Theme);
         addValue(nameof(Hotkey), Hotkey);
@@ -518,7 +512,6 @@ public sealed class RenderConfig : IDeserializable<RenderConfig>, ISerializable
 
     public static RenderConfig Default => new()
     {
-        RenderSpeed = 1,
         ScoringType = ScoringTypeEnum.None,
         Theme = ThemeEnum.None,
         Hotkey = HotkeyEnum.Keyboard,
