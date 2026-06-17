@@ -23,6 +23,7 @@ internal static class MapXmlExtensions
         nameof(PressurePlateCollision) => e.DeserializeTo<PressurePlateCollision>(),
         nameof(SoftPressurePlateCollision) => e.DeserializeTo<SoftPressurePlateCollision>(),
         nameof(LavaCollision) => e.DeserializeTo<LavaCollision>(),
+        nameof(MudCollision) => e.DeserializeTo<MudCollision>(),
         _ => null
     };
 

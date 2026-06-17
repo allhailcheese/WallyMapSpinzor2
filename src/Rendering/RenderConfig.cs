@@ -151,6 +151,7 @@ public sealed class RenderConfig : IDeserializable<RenderConfig>, ISerializable
     public required Color ColorPressurePlateCollision { get; set; }
     public required Color ColorSoftPressurePlateCollision { get; set; }
     public required Color ColorLavaCollision { get; set; }
+    public required Color ColorMudCollision { get; set; }
 
     public required Color ColorCollisionNormal { get; set; }
     public required Color ColorFireOffset { get; set; }
@@ -262,6 +263,7 @@ public sealed class RenderConfig : IDeserializable<RenderConfig>, ISerializable
         ColorPressurePlateCollision = other.ColorPressurePlateCollision;
         ColorSoftPressurePlateCollision = other.ColorSoftPressurePlateCollision;
         ColorLavaCollision = other.ColorLavaCollision;
+        ColorMudCollision = other.ColorMudCollision;
         ColorCollisionNormal = other.ColorCollisionNormal;
         ColorFireOffset = other.ColorFireOffset;
         ColorFireOffsetLine = other.ColorFireOffsetLine;
@@ -375,6 +377,7 @@ public sealed class RenderConfig : IDeserializable<RenderConfig>, ISerializable
         ColorPressurePlateCollision = getColor(nameof(ColorPressurePlateCollision), @default.ColorPressurePlateCollision);
         ColorSoftPressurePlateCollision = getColor(nameof(ColorSoftPressurePlateCollision), @default.ColorSoftPressurePlateCollision);
         ColorLavaCollision = getColor(nameof(ColorLavaCollision), @default.ColorLavaCollision);
+        ColorMudCollision = getColor(nameof(ColorMudCollision), @default.ColorMudCollision);
         ColorCollisionNormal = getColor(nameof(ColorCollisionNormal), @default.ColorCollisionNormal);
         ColorFireOffset = getColor(nameof(ColorFireOffset), @default.ColorFireOffset);
         ColorFireOffsetLine = getColor(nameof(ColorFireOffsetLine), @default.ColorFireOffsetLine);
@@ -483,6 +486,7 @@ public sealed class RenderConfig : IDeserializable<RenderConfig>, ISerializable
         addColor(nameof(ColorPressurePlateCollision), ColorPressurePlateCollision);
         addColor(nameof(ColorSoftPressurePlateCollision), ColorSoftPressurePlateCollision);
         addColor(nameof(ColorLavaCollision), ColorLavaCollision);
+        addColor(nameof(ColorMudCollision), ColorMudCollision);
         addColor(nameof(ColorCollisionNormal), ColorCollisionNormal);
         addColor(nameof(ColorFireOffset), ColorFireOffset);
         addColor(nameof(ColorFireOffsetLine), ColorFireOffsetLine);
@@ -580,6 +584,7 @@ public sealed class RenderConfig : IDeserializable<RenderConfig>, ISerializable
         ColorPressurePlateCollision = Color.FromHex(0xCC6619FF),
         ColorSoftPressurePlateCollision = Color.FromHex(0x7F1900FF),
         ColorLavaCollision = Color.FromHex(0xFF8000FF),
+        ColorMudCollision = Color.FromHex(0x70543EFF),
         ColorCollisionNormal = Color.FromHex(0xFFFFFF7F),
         ColorFireOffset = Color.FromHex(0x7000AA70),
         ColorFireOffsetLine = Color.FromHex(0xBB7000D0),

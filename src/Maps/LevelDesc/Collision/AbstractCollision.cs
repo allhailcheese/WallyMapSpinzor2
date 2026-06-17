@@ -24,7 +24,6 @@ public abstract class AbstractCollision : IDrawable, ISerializable
         DEFAULT = 0
     }
 
-    public string? TauntEvent { get; set; }
     public int Team { get; set; }
     public double? AnchorX { get; set; }
     public double? AnchorY { get; set; }
@@ -48,8 +47,6 @@ public abstract class AbstractCollision : IDrawable, ISerializable
 
     protected AbstractCollision(XElement e)
     {
-        TauntEvent = e.GetAttributeOrNull("TauntEvent");
-
         Team = e.GetIntAttribute("Team", 0);
 
         //brawlhalla requires both attributes to exist for an anchor
@@ -102,8 +99,6 @@ public abstract class AbstractCollision : IDrawable, ISerializable
 
     protected static C Deserialize<C>(XElement e) where C : AbstractCollision, new()
     {
-        string? TauntEvent = e.GetAttributeOrNull("TauntEvent");
-
         int Team = e.GetIntAttribute("Team", 0);
 
         //brawlhalla requires both attributes to exist for an anchor
@@ -155,7 +150,6 @@ public abstract class AbstractCollision : IDrawable, ISerializable
 
         return new()
         {
-            TauntEvent = TauntEvent,
             Team = Team,
             AnchorX = AnchorX,
             AnchorY = AnchorY,
@@ -172,9 +166,6 @@ public abstract class AbstractCollision : IDrawable, ISerializable
 
     public virtual void Serialize(XElement e)
     {
-        if (TauntEvent is not null)
-            e.SetAttributeValue("TauntEvent", TauntEvent);
-
         if (Team != 0)
             e.SetAttributeValue("Team", Team);
 
